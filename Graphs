@@ -1,0 +1,448 @@
+"""
+Complete BInary Tree: Every level except last level is completely filled. All nodes 
+on left are filled first, then right ones
+
+Full Binary Tree: A binary tree in which each node has exactly 0 or 2 children
+
+Perfect Binary Tree:  A type of full binary tree where each node has exactly 2 children
+
+Right Skewed Tree: A tree in which every node has a right child or no child at all
+
+Left Skewed Tree: A tree in which every node has a left child or no child at all
+
+Height Balanced Tree: A tree such that the left and right subtrees for any node differ in
+height by at most one. AVL and RB trees are examples
+
+Binary Search Tree (BST): The left child value is less than parent, the right child value 
+is more than parent, and duplicate values are allowed
+
+Pre-Order Traversal: Parent is visited, then left child subtree, then right child subtree
+
+Post-Order Traversal: Left Child is vistied, then right child, then parent
+
+In-Order Traversal: Left Child is visited, then parent, then right child
+
+A heap is a complete tree so that the left and right children of a node are larger than
+parent
+
+Segment Tree: A binary tree that is used to make multiple range queries and range
+updates in an array
+
+AVL: A height balanced BST
+
+
+
+"""
+from collections import deque
+
+class Tree(object):
+    class Node(object):
+        def __init__(self, value, left_node = None, right_node = None):
+            self.value = value
+            self.lChild = left_node
+            self.rChild = right_node
+            
+    def __init__(self):
+        self.root = None
+    
+    #Create a complete binary tree from values given as an array
+    def CompleteBinaryUtil(self, arr, start):
+        size = len(arr)
+        curr = self.Node(arr[start])
+        left = 2*start + 1
+        right = 2*start + 2
+        if left < size:
+            curr.lChild = self.CompleteBinaryUtil(arr, left)
+        if right < size:
+            curr.rChild = self.CompleteBinaryUtil(arr, right)
+        return curr 
+    
+    def CompleteBinary(self, arr):
+        size = len(arr)
+        if size > 0:
+            tree = self.CompleteBinaryUtil(arr,0)
+        return tree
+        #DepthFirst(tree)
+        
+    #Create a binary tree of a list of values in sorted order
+    def CreateBinaryTreeUtil(self, arr,start,end):
+        if start > end:
+            return None
+        mid = (start + end)//2
+        curr = self.Node(arr[mid])
+        curr.lChild = self.CreateBinaryTreeUtil(arr, start, mid-1)
+        curr.rChild = self.CreateBinaryTreeUtil(arr, mid+1, end)
+        return curr 
+    
+    def CreateBinaryTree(self, arr):
+        tree = self.CreateBinaryTreeUtil(arr,0,len(arr)-1)
+        return tree
+    
+    #Insert node into BST
+    def InsertNodeUtil(self, Node, value):
+        if Node == None:
+            Node = self.Node(value)
+        else:
+            if Node.value > value:
+                Node.lChild = self.InsertNodeUtil(Node.lChild, value)
+            else:
+                Node.rChild = self.InsetNodeUtil(Node.rChild, value)
+                
+    def Find(self, value):
+        curr = self.root 
+        while curr != None:
+            if curr == value:
+                return True
+            elif curr.value() > value:
+                curr = curr.lChild
+            else:
+                curr = curr.rChild
+        return False
+    
+    def FindMin(self):
+        curr = self.root
+        if curr == None:
+            return None
+        while curr.lChild != None:
+            curr = curr.lChild
+        return curr
+    
+    def FindMax(self):
+        curr = self.root
+        if curr == None:
+            return None
+        while curr.rChild != None:
+            curr = curr.rChild
+        return curr
+    
+    def FindMaxUtil(self, curr):
+        Node = curr
+        if Node == None:
+            return None
+        while Node.rChild != None:
+            Node = Node.rChild
+        return Node
+            
+        
+    #Maximum value is always in right most node
+    #Minimum value is always in left most node
+    
+    #Determine if a given binary tree is a Binary Search Tree
+    def isBSTUtil(self, curr, minval, maxval):
+        if curr == None:
+            return True
+        if curr.value < minval or curr.value > maxval:
+            return False
+        return self.isBSTUtil(curr.lChild,minval,curr.value) and self.isBSTUtil(curr.rChild, curr.value, maxval)
+    
+    def isBST(self):
+        return self.isBSTUtil(self.root,-999999,999999)
+    
+    #Delete Node: Remove the node 'x' from the BST, reorganize nodes of the BST to
+    #maintain its properties. There are three cases:
+        #1) Node x has no children. Here we can just delete the node
+        #2) Node has 1 child. In this we delete it and join the child to its parent
+        #3) Node has 2 children. Find the min of right subtree and it replaces that value
+        
+    def DeleteNodeUtil(self, Node, value):
+        temp = None
+        if Node != None:
+            if Node.value == value:
+                if Node.lChild == None and Node.rChild == None:
+                    return None
+                else:
+                    if Node.lChild == None:
+                        temp = Node.rChild
+                        return temp
+                    if Node.rChild == None:
+                        temp = Node.lChild
+                        return temp
+                    maxnode = self.FindMax(Node.lChild)
+                    Node.value = maxnode.value
+                    Node.lChild = self.DeleteNodeUtil(Node.lChild, maxnode.value)
+            else:
+                if Node.value > value:
+                    Node.lChild = self.DeleteNodeUtil(Node.lChild, value)
+                else:
+                    Node.rChild = self.DeleteNodeUtil(Node.rChild, value)
+        return Node
+    
+    def DeleteNode(self, value):
+        self.root = self.DeleteNodeUtil(self.root, value)
+        
+    #Least Common Ancestor
+    def LCABSTUtil(self, curr, first, second):
+        if curr == None:
+            return None
+        if curr.value > first and curr.value > second:
+            return self.LCABSTUtil(curr.lChild, first, second)
+        if curr.value < first and curr.value < second:
+            return self.LCABSTUtil(curr.rChild, first, second)
+        return curr 
+    
+    def LCABST(self, first, second):
+        curr = self.LCABSTUtil(self.root, first, second)
+        if (curr == None):
+            raise RuntimeError("LCAMissing")
+        return curr.value 
+    
+    
+        
+#Pre-Order Traversal        
+def PreOrder(Node):
+    if Node != None:
+        print(Node.value,end=" ")
+        inOrder(Node.lChild)
+        inOrder(Node.rChild)
+    
+#In-Order Traversal        
+def inOrder(Node):
+    if Node != None:
+        inOrder(Node.lChild)
+        print(Node.value,end=" ")
+        inOrder(Node.rChild)
+
+#Post-Order Traversal
+def PostOrder(Node):
+    if Node != None:
+        inOrder(Node.lChild)
+        inOrder(Node.rChild)
+        print(Node.value,end=" ")
+        
+#Level order Traversal/Breadth First traveral
+#Write code to implement traversal so that nodes at depth k are printed before nodes 
+#at depth k+1
+
+def BreadthFirst(Node):
+    que = deque([])
+    temp = None
+    if Node != None:
+        que.append(Node)
+    while len(que) != 0:
+        temp = que.popleft()
+        print(temp.value, end =" ")
+        if temp.lChild != None:
+            que.append(temp.lChild)
+        if temp.rChild != None:
+            que.append(temp.rChild)
+            
+#Depth First Traversal without using recursion or system stack
+def DepthFirst(Node):
+    stk = []
+    if Node != None:
+        stk.append(Node)
+    while len(stk) > 0:
+        temp = stk.pop()
+        print(temp.value, end = " ")
+        if temp.rChild != None:
+            stk.append(temp.rChild)
+        if temp.lChild != None:
+            stk.append(temp.lChild)
+
+def LineByLine(Node):
+    que = deque([])
+    temp = None
+    if Node != None:
+        que.append(Node)
+    while len(que) != 0:
+        count = len(que)
+        while count > 0:
+            temp = que.popleft()
+            print(temp.value, end =" ")
+            if temp.lChild != None:
+                que.append(temp.lChild)
+            if temp.rChild != None:
+                que.append(temp.rChild)   
+            count -= 1
+        print(" ")
+
+#Given a Binary Tree print the nodes breadth first in spiral order
+#This is not quite correct and needs to be added to tree class as atribute
+def PrintSpiralTree(Node):
+    stk1 = []
+    stk2 = []
+    output = []
+    if Node != None:
+        stk1.append(Node)
+    while len(stk1) != 0 or len(stk2) != 0:
+        while len(stk1) != 0:
+            temp = stk1.pop()
+            output.append(temp.value)
+            if temp.rChild != None:
+                stk2.append(temp.rChild)
+            if temp.lChild != None:
+                stk2.append(temp.lChild)
+        while len(stk2) != 0:
+            temp = stk2.pop()
+            output.append(temp.value)
+            if temp.lChild != None:
+                stk1.append(temp.lChild)
+            if temp.rChild != None:
+                stk1.append(temp.rChild)
+    print(output)
+        
+#Print all paths in  a given binary tree from root to the leaf
+def printAllPathsUtil(curr, stk):
+    if curr == None:
+        return 
+    stk.append(curr.value)
+    if curr.lChild == None and curr.rChild == None:
+        print(stk)
+        stk.pop()
+        return 
+    printAllPathsUtil(curr.rChild, stk)
+    printAllPathsUtil(curr.lChild, stk)
+    stk.pop()
+
+def printAllPaths(Node):
+    stk = []
+    printAllPathsUtil(Node, stk)
+
+#Number of Elments in Tree
+def numNodesUtil(curr):
+    if curr == None:
+        return 0
+    else:
+        return (1 + numNodesUtil(curr.lChild) + numNodesUtil(curr.rChild))
+
+def numNodes(Node):
+    return numNodesUtil(Node)
+
+#Sum of all nodes in tree
+def sumallUtil(curr):
+    if curr == None:
+        rightSum = sumallUtil(curr.rChild)
+        leftSum = sumallUtil(curr.lChild)
+        finalSum = rightSum + leftSum + curr.value
+    return finalSum
+
+def sumall(Node):
+    return sumallUtil(Node)
+
+#Number of leaf nodes
+def LeafNodesUtil(curr):
+    if curr == None:
+        return 0
+    if curr.lChild == None and curr.rChild == None:
+        return 1
+    else:
+        return (LeafNodesUtil(curr.rChild) + LeafNodesUtil(curr.lChild))
+
+def LeafNodes(Node):
+    return LeafNodesUtil(Node)
+
+#Count number of full nodes. Full nodes are nodes that have two children
+def numFullNodesUtil(curr):
+    if curr == None:
+        return 0
+    count = numFullNodesUtil(curr.rChild) + numFullNodesUtil(curr.lChild)
+    if curr.rChild != None and curr.lChild != None:
+        count += 1
+    return count
+
+def numFullNodes(Node):
+    return numFullNodesUtil(Node)
+
+#Search for value in Binary Tree
+def searchBST(Node, target):
+    if Node == None:
+        return False
+    if Node.value == target:
+        return True
+    left = searchBST(Node.lChild, target)
+    if left:
+        return True
+    right = searchBST(Node.rChild, target)
+    if right:
+        return True
+    return False
+
+#Find maximum value in BT
+def FindMax(Node):
+    if Node == None:
+        return -999999
+    maxval = Node.value
+    left = FindMax(Node.lChild)
+    right = FindMax(Node.rChild)
+    if left > maxval:
+        maxval = left
+    if right > maxval:
+        maxval = right
+    return maxval 
+
+#Tree Depth
+def TreeDepthUtil(Node):
+    if Node == None:
+        return 0
+    else:
+        lDepth = TreeDepthUtil(Node.lChild)
+        rDepth = TreeDepthUtil(Node.rChild)
+        
+        if lDepth > rDepth:
+            return lDepth + 1
+        else:
+            return rDepth + 1
+    
+def TreeDepth(Node):
+    return TreeDepthUtil(Node)
+
+            
+#Given a tree copy its value into another Binary Tree
+def CopyTreeUtil(curr):
+    if curr != None:
+        temp = curr.value
+        temp.lChild = CopyTreeUtil(curr.lChild)
+        temp.rChild = CopyTreeUtil(curr.rChild)
+        return temp
+    else:
+        return None
+    
+def CopyTree(Node):
+    tree2 = Tree()
+    tree2 = CopyTreeUtil(Node)
+    return tree2
+
+#Determone if a tree is a complete tree
+#Perform BFS search on tree 
+def isTreeComplete(Node):
+    que = deque([])
+    temp = None
+    noChild = False
+    
+    if Node != None:
+        que.append(Node)
+    
+    while len(que) != 0:
+        temp = que.popleft()
+        if temp.lChild != None:
+            if noChild == True:
+                return False
+            que.append(temp.lChild)
+        else:
+            noChild = True
+        
+        if temp.rChild != None:
+            if noChild == True:
+                return False
+            que.append(temp.rChild)
+        else:
+            noChild = True
+            
+    return True
+            
+
+
+        
+    
+
+
+#Test Code
+arr = [1, 2, 3, 4, 5, 6]
+t = Tree()
+t1 = t.CreateBinaryTree(arr)
+#t1 = t.CompleteBinary(arr)
+#DepthFirst(t1)
+#printAllPaths(t1)
+print(TreeDepth(t1))
+print(FindMax(t1))
+print(isTreeComplete(t1))
