@@ -1,0 +1,211 @@
+
+"""
+Heap: Sometiimes called priority queue, a complete binary tree with the property
+that parents are smaller or larger than children.
+Min-Heap: Heap such that each parent is less than children
+Max-Heap: Heap such that each parent is greater than children
+
+"""
+#Max Heap 
+class Heap(object):
+    def __init__(self):
+        self.size = 0
+        self.arr = [0] #we don't use 0 index
+        
+    def proclateUp(self, position):
+        parent = (position // 2)
+        if parent == 0:
+            return 
+        if self.arr[parent] - self.arr[position] < 0:
+            temp = self.arr[position]
+            self.arr[position] = self.arr[parent]
+            self.arr[parent] = temp 
+            self.proclateUp(parent)
+            
+    def add(self, value):
+        self.size += 1
+        self.arr.append(value)
+        self.proclateUp(self.size)
+        
+    def procolateDown(self, position):
+        lChild = 2*position
+        rChild = lChild + 1
+        small = -1
+        if lChild <= self.size:
+            small = lChild
+        if (rChild <= self.size) and (self.arr[rChild] - self.arr[lChild] < 0):
+            small = rChild
+        if small != -1 and (self.arr[small] - self.arr[position] < 0):
+            temp = self.arr[position]
+            self.arr[position] = self.arr[small]
+            self.arr[small]  = temp
+            self.procolateDown(small)
+            
+    def remove(self):
+        if self.size == 0:
+            raise RuntimeError(" Heap is empty")
+        value = self.arr[1]
+        self.arr[1] = self.arr[self.size]
+        self.size -= 1
+        self.procolateDown(1)
+        return value 
+    
+    def printHeap(self):
+        print(self.arr[1:])
+    
+    def isEmpty(self):
+        return (self.size == 0)
+    
+    def peek(self):
+        if self.size == 0:
+            raise RuntimeError("Heap is Empty")
+        return self.arr[1]
+    
+def Heapify(arr):
+    hp = Heap()
+    for a in arr:
+        hp.add(a)
+    return hp.printHeap()
+
+#testing code
+
+a = [1,9,8,7,0,2,4,5,3]
+b = [1,2,3,4,5,6,7,8]
+Heapify(a)
+
+# import heapq
+
+# #Example 10.24: Give a data structure that will provide the median of given
+# #values in constant time
+# class MedianHeap(object):
+#     def __init__(self):
+#         self.MinHeap = []
+#         self.MaxHeap = []
+        
+#     def MinHeapInsert(self, value):
+#         heapq.heappush(self.MinHeap, value)
+    
+#     def MaxHeapInsert(self, value):
+#         heapq.heappush(self.MaxHeap, -1*value)
+        
+#     def MaxHeapPeak(self):
+#         return -1 * self.MaxHeap[0]
+    
+#     def MinHeapPeak(self):
+#         return self.MinHeap[0]
+    
+#     def MinHeapRemove(self):
+#         return heapq.heappop(self.MinHeap)
+    
+#     def MaxHeapRemove(self):
+#         return -1 * heapq.heappop(self.MaxHeap)
+    
+#     #Other Methods
+#     def insert(self, value):
+#         if len(self.MaxHeap) == 0 or self.MaxHeapPeak() >= value:
+#             self.MaxHeapInsert(value)
+#         else:
+#             self.MinHeapInsert(value)
+#         #self-balancing
+#         if len(self.MaxHeap) > len(self.MinHeap) + 1:
+#             value = self.MaxHeapRemove()
+#             self.MinHeapInsert(value)
+#         if len(self.MinHeap) > len(self.MaxHeap) + 1:
+#             value = self.MinHeapRemove()
+#             self.MaxHeapInsert(value)
+    
+#     def GetMedian(self):
+#         if len(self.MaxHeap) == 0 and len(self.MinHeap) == 0:
+#             return 9999999
+#         if len(self.MaxHeap) == len(self.MinHeap):
+#             return (self.MaxHeapPeak() + self.MinHeapPeak())//2
+#         elif len(self.MaxHeap) > len(self.MinHeap):
+#             return self.MaxHeapPeak()
+#         else:
+#             return self.MinHeapPeak()
+        
+
+# #Testing Code
+# arr = [1,9,2,8,3,7,4,6,5,1,9,2,8,3,7,4,6,5,10,10]
+# hp = MedianHeap()
+# i = 0
+# while i<20:
+#     hp.insert(arr[i])
+#     print("Median after insertion of", arr[i], "is", hp.GetMedian())
+#     i += 1
+        
+            
+    
+
+# class MinHeap (object):
+#     def __init__(self):
+#         self.heap_list = [0]
+#         self.current_size = 0
+ 
+#     def sift_up(self, i):
+#         Stop = False
+#         while (i // 2 > 0) and Stop == False:
+#             if self.heap_list[i] < self.heap_list[i // 2]:
+#                 self.heap_list[i], self.heap_list[i // 2] = self.heap_list[i // 2], self.heap_list[i]
+#             else:
+#                 Stop = True
+#             i = i // 2
+ 
+#     def insert(self, k):
+#         # Append the element to the heap
+#         self.heap_list.append(k)
+#         # Increase the size of the heap.
+#         self.current_size += 1
+#         # Move the element to its position from bottom to the top
+#         self.sift_up(self.current_size)
+ 
+#     def sift_down(self, i):
+#         # if the current node has at least one child
+#         while (i * 2) <= self.current_size:
+#             # Get the index of the min child of the current node
+#             mc = self.min_child(i)
+#             # Swap the values of the current element is greater than its min child
+#             if self.heap_list[i] > self.heap_list[mc]:
+#                 self.heap_list[i], self.heap_list[mc] = self.heap_list[mc], self.heap_list[i]
+#             i = mc
+ 
+#     def min_child(self, i):
+#         # If the current node has only one child, return the index of the unique child
+#         if (i * 2)+1 > self.current_size:
+#             return i * 2
+#         else:
+#             # Herein the current node has two children
+#             # Return the index of the min child according to their values
+#             if self.heap_list[i*2] < self.heap_list[(i*2)+1]:
+#                 return i * 2
+#             else:
+#                 return (i * 2) + 1
+ 
+#     def delete_min(self):
+#         # Equal to 1 since the heap list was initialized with a value
+#         if len(self.heap_list) == 1:
+#             return 'Empty heap'
+ 
+#         # Get root of the heap (The min value of the heap)
+#         root = self.heap_list[1]
+ 
+#         # Move the last value of the heap to the root
+#         self.heap_list[1] = self.heap_list[self.current_size]
+ 
+#         # Pop the last value since a copy was set on the root
+#         *self.heap_list, _ = self.heap_list
+ 
+#         # Decrease the size of the heap
+#         self.current_size -= 1
+ 
+#         # Move down the root (value at index 1) to keep the heap property
+#         self.sift_down(1)
+ 
+#         # Return the min value of the heap
+#         return root
+    
+#     def print_heap(self):
+#         for i in range(0,self.current_size,1):
+#             print(self.heap_list[i], end = " ")
+        
+        
