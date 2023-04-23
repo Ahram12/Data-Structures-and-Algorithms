@@ -1,0 +1,174 @@
+
+"""
+Queue is an abstract data type that follows FIFO and supports the following operations:
+    add(): add element to back of queue
+    remove(): removes single element from front of queue
+    isEmpty(): returns 1 if queue is empty
+    size(): Returns num elements in queue
+
+"""
+
+from queue import Queue
+from collections import deque
+
+class Queue(object):
+    def __init__(self):
+        self.data = deque([])
+        
+    def add(self, value):
+        self.data.append(value)
+    
+    def add_values(self, values):
+        for values in values:
+            self.add(values)
+    
+    def remove(self):
+        value = self.data.popleft()
+        return value
+    
+    def isEmpty(self):
+        return (len(self.data) == 0)
+    
+    def size(self):
+        return len(self.data)
+    
+    def printQueue(self):
+        print(self.data)
+        
+# #Testing Code
+# que = Queue()
+# i = 0
+# while i < 20:
+#     que.add(i)
+#     i += 1
+# que.printQueue()
+# que.remove()
+# que.printQueue()
+
+#Can also implement through circular linked list
+# class Queue(object):
+    
+#     class Node(object):
+#         def __int__(self, value, next_node = None):
+#             self.value = value
+#             self.next = next_node
+            
+#     def __init__(self):
+#         self.head = None
+#         self.tail = None
+#         self.count = 0
+    
+#     def size(self):
+#         return self.count
+    
+#     def isEmpty(self):
+#         return (self.head == None)
+    
+#     def printList(self):
+#         temp = self.head
+#         while temp != None:
+#             print(temp.value, end = '')
+#             temp = temp.next
+            
+#     def add(self, value):
+#         temp = self.Node(value, None)
+#         self.count += 1
+#         if self.head == None:
+#             self.head = self.tail = temp
+#         else:
+#             self.tail.next = temp
+#             self.tail = temp
+        
+#     def remove(self):
+#         if self.isEmpty():
+#             raise RuntimeError('EmptyQueueException')
+#         self.count += 1
+#         value = self.head.value
+#         self.head = self.head.next
+#         return value
+    
+#     def peek(self):
+#         if self.isEmpty:
+#             raise RuntimeError('EmptyQueueException')
+#         return self.head.value
+    
+  
+#Josephus Problem
+que = Queue()
+i = 1
+while i < 11:
+    que.add(i)
+    i += 1
+
+
+def JosephusUtil(que, k):
+    size = que.size()
+    if k > size:
+        raise RuntimeError('kValueTooLarge')
+    i = 0
+    aux_que = Queue()
+    while i < k:
+        aux_que.add(que.remove())
+        i += 1
+    i = 0
+    while i < k:
+        que.add(aux_que.remove())
+        i += 1
+    return que
+    
+def Josephus(que, k):
+    while que.size() > k:
+        JosephusUtil(que, k)
+        que.remove()
+    size = que.size()
+    i = 0
+    while i < size-1:
+        que.remove()
+        i += 1
+    que.printQueue()
+
+#Example 8.7: Given two values X and Y, you need to convert X to Y by performing 
+#various steps. In a step you can either multiply by 2 or subtract 1 from it
+def convertXY(src, dst):
+    que = Queue()
+    visited = dict()
+    que.add((src,0))
+    
+    while que.size() > 0:
+        node = que.remove()
+        visited[node[0]] = 1
+        value = node[0]
+        steps = node[1]
+        if value == dst:
+            return steps
+        if value < dst and (value *2) not in visited:
+            que.add((value*2, steps +1))
+        if value > 0 and (value -1) not in visited:
+            que.add((value-1,steps +1))
+            
+    return -1 
+    
+#Testing Code
+# for i in range(20):
+#     print("3 to ", i, ": ", convertXY(3, i))    
+
+#Example 8.8: Given an array of integers, find the maximum value in all windows of
+#length k 
+
+def maxSlidingWindows(arr, k):
+    size = len(arr)
+    que = deque()
+    ans = []
+    for i in range(size):
+        if len(que)>0 and que[0] <= i-k:
+            que.popleft()
+        while len(que)>0 and arr[que[-1]] <= arr[i]:
+            que.pop()
+        que.append(i)
+        if i >= (k-1):
+            ans.append(arr[que[0]])
+    return ans
+    
+arr =[11,2,75,92,59,90,55]
+k = 3
+print(maxSlidingWindows(arr, k))
