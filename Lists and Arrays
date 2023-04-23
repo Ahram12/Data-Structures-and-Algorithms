@@ -1,0 +1,218 @@
+#Initailize test arrays
+a = [10,9,8,7,6,5]
+b = [9,1,8,2,7,3,6,4,5]
+m = [-1,76,13,-95,100]
+n = [3,4,2,1,6,5,7,8,1,1]
+p = [6,4,5,1,8,2,9,7,3,10]
+q = [7,10,4,3,20,15]
+o = [170,45,75,90,802,24,2,66]
+
+#Bubble Sort v1
+def BubbleSort1(arr):
+    n = len(arr)
+    for i in range(n-1):
+        for j in range(n-i-1):
+            if arr[j] > arr[j+1]:
+                temp = arr[j]
+                arr[j] = arr[j+1]
+                arr[j+1] = temp
+    return arr
+
+#Bubble Sort v2
+def BubbleSort2(arr):
+    n = len(arr)
+    swapped = 1
+    i = 0
+    for i in range(n-1):
+        swapped = 0
+        for j in range(n-i-1):
+            if arr[j] > arr[j+1]:
+                temp = arr[j]
+                arr[j] = arr[j+1]
+                arr[j+1] = temp
+                swapped = 1
+        if swapped == 0:
+            break 
+    return arr
+        
+#Insertion Sort
+def InsertionSort(arr):
+    n = len(arr)
+    i = 1
+    while i < n:
+        temp = arr[i]
+        j = i
+        while j > 0 and arr[j-1] > temp:
+            arr[j] = arr[j-1]
+            j -= 1
+        arr[j] = temp
+        i += 1
+    return arr
+
+        
+#Selection Sort
+def SelectionSort(arr):
+    #back array
+    n = len(arr)
+    for i in range(n-1):
+        maxIndex = 0
+        for j in range(1,n-i-1):
+            if arr[j] > arr[maxIndex]:
+                maxIndex = j
+        temp = arr[n-i-1]
+        arr[n-i-1] = arr[maxIndex]
+        arr[maxIndex] = temp
+    return arr
+
+#Merge Sort
+def MergeSort(arr):
+    n = len(arr)
+    
+    def merge(l,r):
+        n1 = len(l)
+        n2 = len(r)
+        temp = [0]*(n1+n2)
+        i = 0
+        j = 0
+        k = 0
+        while i < n1 and j < n2:
+            if l[i]<r[j]:
+                temp[k] = l[i]
+                i += 1
+                k += 1
+            else:
+                temp[k] = r[j]
+                j += 1
+                k += 1
+        
+        while i < n1:
+            temp[k] = l[i]
+            i += 1
+            k += 1
+            
+        while j < n2:
+            temp[k] = r[j]
+            j += 1
+            k += 1
+            
+        return temp 
+            
+    if n <=1:
+        return arr
+    else:
+        mid = n//2
+        l = MergeSort(arr[:mid])
+        r = MergeSort(arr[mid:])
+        newarr = merge(l,r)
+        
+    return newarr
+        
+def QuickSort(arr): 
+    n = len(arr)
+    if n < 2:
+        return arr
+    else:
+        current_position = 0 
+
+        for i in range(1, n, 1): 
+             if arr[i] <= arr[0]:
+                  current_position += 1
+                  temp = arr[i]
+                  arr[i] = arr[current_position]
+                  arr[current_position] = temp
+
+        temp = arr[0]
+        arr[0] = arr[current_position] 
+        arr[current_position] = temp 
+        
+        left = QuickSort(arr[:current_position]) 
+        right = QuickSort(arr[current_position+1:]) 
+
+        arr = left + [arr[current_position]] + right 
+    
+    return arr     
+  
+#Selection algorithm not sorting  
+#Idea is to find k-th largest element of array without sorting whole list     
+def QuickSelect(arr,k):
+    n = len(arr)
+    if k > n:
+        return -1
+    else:
+        current_position = 0
+        
+        for i in range(1, n, 1):
+            if arr[0] >= arr[i]:
+                current_position += 1
+                temp = arr[i]
+                arr[i] = arr[current_position]
+                arr[current_position] = temp
+                
+        temp = arr[0]
+        arr[0] = arr[current_position]
+        arr[current_position] = temp
+        
+        l = arr[:current_position]
+        r = arr[current_position+1:]
+        
+        if current_position == k-1:
+            return arr[current_position]
+        elif current_position > k-1:
+            return QuickSelect(l, k)
+        elif k -1 > current_position:
+            return QuickSelect(r, k-current_position-1)
+                
+def BucketSort(arr, lower, upper):
+    n = len(arr)
+    datarange = upper - lower
+    array = arr
+    count = [0]*datarange
+    
+    for i in range(n):
+        count[arr[i]-lower] += 1
+    
+    j = 0
+    for i in range(datarange):
+        while count[i] > 0:
+            array[j] = i + lower
+            count[i] -= 1
+            j += 1
+    
+    return array
+
+#Assume base b =10    
+def RadixSort(arr):
+    
+    def Countsort(arr, exp):    
+        n =len(arr)
+        output = [0]*n
+        count = [0]*10
+        
+        for i in range(n):
+            index = arr[i] // exp
+            count[index % 10] += 1
+        
+        for i in range(1,10,1):
+            count[i] += count[i-1]
+    
+        i = n-1
+        while i >= 0:
+            index = arr[i] // exp
+            output[count[index % 10] - 1] = arr[i]
+            count[index % 10] -= 1
+            i -= 1
+    
+        for i in range(n):
+            arr[i] = output[i]
+        
+        return arr 
+    
+    max_element = max(arr)
+    exp = 1
+    
+    while max_element // exp > 0:
+        arr = Countsort(arr, exp)
+        exp *= 10
+        
+    return arr
+
