@@ -1,0 +1,457 @@
+
+#Stack can be implemented with array or linked list
+#with array size is fixed and there is no limit for linked lists
+
+#Stack using array
+class Stack(object):
+    def __init__(self):
+        self.data = []
+        
+    def isEmpty(self):
+        return (len(self.data) == 0)
+    
+    def size(self):
+        return len(self.data)
+    
+    def printStack(self):
+        print(self.data)
+        
+    def push(self,value):
+        self.data.append(value)
+       
+    def pop(self):
+        if self.isEmpty():
+            raise RuntimeError('StackEmptyExcpetion')
+        return self.data.pop()
+    
+    def top(self):
+        if self.isEmpty():
+            return RuntimeError('StackEmptyException')
+        return self.data[len(self.data)-1]
+    
+# class Stack(object):
+#     class Node(object):
+#         def __init__(self, value, next_node = None):
+#             self.value = value
+#             self.next = next_node
+            
+#     def __init__(self):
+#         self.head = None
+#         self.stacksize = 0
+    
+#     def __str__(self):
+#         return ' -> '.join([str(node) for node in self])
+        
+#     def size(self):
+#         return self.stacksize
+    
+#     def isEmpty(self):
+#         return self.stacksize == 0
+    
+#     def peek(self):
+#         if self.isEmpty():
+#             raise RuntimeError('StackEmptyException')
+#         return self.head.value
+    
+#     def push(self, value):
+#         self.head = self.Node(value, self.head)
+#         self.stacksize += 1
+    
+#     def pop(self):
+#         if self.isEmpty():
+#             raise RuntimeError('StackEmptyException')
+#         value = self.head.value
+#         self.head = self.head.next
+#         self.stacksize -= 1
+#         return value 
+    
+#     def printStack(self):
+#         temp = self.head
+#         while temp != None:
+#             print(temp.value, end = '')
+#             temp = temp.next
+            
+#Example 7.7: Given a stack whose elements are sorted, write a function that will insert elements
+#in sorted order 
+def sortedInsert(stk, element):
+    if stk.isEmpty() or element > stk.top():
+        stk.push(element)
+    else:
+        temp = stk.pop()
+        sortedInsert(stk, element)
+        stk.push(temp)
+
+#Example 7.9: Given a stack sort the elements so that the largest value is at the top
+def sortStack(stk):
+    if stk.isEmpty() == False:
+        temp = stk.pop()
+        sortStack(stk)
+        sortedInsert(stk, temp)
+
+#Example 7.10: Given a stack write a function to insert element at the the bottom of the stack
+def bottomInsert(stk, element):
+    if stk.isEmpty():
+        stk.push(element)
+    else:
+        temp = stk.pop()
+        bottomInsert(stk, element)
+        stk.push(element)
+
+from queue import Queue
+from collections import deque
+        
+#Example 7.11: Given a stack reverse its elements
+def ReverseStack(stk):
+    que = Queue()
+    while stk.isEmpty() == False:
+        que.put(stk.pop())
+        
+    while que.empty() == False:
+        stk.push(que.get())
+        
+#Example 7.13: Reverse k-elements at top of stack
+def ReversekElements(stk,k):
+    que = Queue()
+    i = 0
+    while stk.isEmpty() == False and i < k:
+        que.put(stk.pop())
+        i += 1
+    while que.empty() == False:
+        stk.push(que.get())
+
+class TwoStack(object):
+    def __init__(self):
+        self.data = deque([])
+        self.size1 = 0
+        self.size2 = 0
+    
+    def StackPush1(self, value):
+        self.data.appendleft(value)
+        self.size1 += 1
+    
+    def StackPop1(self):
+        if self.size1 == 0:
+            raise RuntimeError('stackempty')
+        self.size1 -= 1
+        return self.data.popleft()
+    
+    def StackPush2(self, value):
+        self.data.append(value)
+        self.size2 += 1
+    
+    def StackPop2(self):
+        if self.size1 == 0:
+            raise RuntimeError('stackempty')
+        self.size -= 1
+        return self.data.pop()
+    
+#Test Code
+st = TwoStack()
+i = 0
+while i < 10:
+    st.StackPush1(i)
+    i += 1
+
+j=0
+while j <10:
+    st.StackPush2(j+10)
+    j += 1
+    
+
+#Example 7.17: Write program to check balanced symbols ({}, [], ()). The closing symbol 
+#should be matched to the most recently seen opening symbol
+def isBalanced(expn):
+    stk = []
+    for ch in expn:
+        if ch == '{' or ch == '(' or ch == '[':
+            stk.append(ch)
+        elif ch == '}':
+            if stk.pop() != '{':
+                return False
+        elif ch == ')':
+            if stk.pop() != ')':
+                return False
+        elif ch == ']':
+            if stk.pop() != ']':
+                return False
+    return len(stk) == 0
+
+#Example 7.20: Given a string of opening and closing parenthesis, find length of longest balnced
+#sustring of parenthesis
+def longestBalanced(expn):
+    size = len(expn)
+    stk = []
+    stk.append(-1)
+    length = 0
+    
+    for i in range(size):
+        if expn[i] == '(':
+            stk.append(i)
+        else:
+            stk.pop()
+            if len(stk) == 0:
+                stk.append(i)
+            else:
+                length = max(length, i-stk[-1])
+        return length 
+
+#Example 7.21: How many reverals will be needed to make an unbalanced expression
+#to a balanced expression
+def reverseParenthesis(expn):
+    stk = []
+    if len(expn) % 2 == 1:
+        print('Invalid odd length', len(expn))
+        return -1
+    opencount = 0
+    closecount = 0
+    for ch in expn:
+        if ch == '(':
+            stk.append(ch)
+        elif ch == ')':
+            if len(stk) != 0 and stk[-1] == '(':
+                stk.pop()
+            else:
+                stk.append(')')
+    while len(stk) != 0:
+        if stk.pop() == '(':
+            opencount += 1
+        else:
+            closecount += 1
+    reversals = opencount//2 + closecount//2 + 2
+    
+    return reversals
+
+#Example 7.22: Given an expression, you need to find the number of duplicate or
+#redundant parenthesis in it. Redundant parenthesis are those pairs that
+#don't change outcome of the expression
+def findDuplicates(expn):
+    stk = []
+    for ch in expn:
+        if ch == ')':
+            count = 0
+            while len(stk) != 0 and stk[-1] != '(':
+                stk.pop()
+                count += 1
+            if count <= 1:
+                return True
+        else:
+            stk.append(ch)
+    return False
+
+#Example 7.23: Given an expression, number each parenthesis pair such that for each
+#pair the opening and closening parenthis have the same number
+def printParenthesis(expn):
+    stk = []
+    output = []
+    count = 1
+    for ch in expn:
+        if ch == '(':
+            stk.append(count)
+            output.append(count)
+            count += 1
+        elif ch == ')':
+            output.append(stk.pop())
+    return output
+
+#Example 7.28: Given a histogram, find the number of consecutive bars in the left side of the
+#current bar that have values less than the current bar
+def StockSpan(arr):
+    stk =[]
+    size = len(arr)
+    SR = [0]*size
+    stk.append(0)
+    SR[0] = 1
+    i = 1
+    while i < size:
+        while len(stk) != 0 and arr[stk[len(stk) - 1]] <= arr[i]:
+            stk.pop()
+            if len(stk) == 0:
+                SR[i] = i + 1
+            else:
+                SR[i] = i - stk[len(stk) - 1]
+            stk.append(i)
+            i += 1
+    return SR
+
+#Example 7.30: Given a histogram of rectangle bars, each one unit wide, find the 
+#maximum are rectangle in the histogram
+
+def GetMaxArea(arr):
+    size = len(arr)
+    stk = []
+    maxArea = 0
+    i = 0
+    while i < size:
+        while (i < size) and (len(stk) == 0 or arr[stk[len(stk)-1]]):
+            stk.append(i)
+            i += 1
+        while not len(stk) == 0 and (i == size or arr[stk[len(stk)-1]] > arr[i]):
+            top = stk[len(stk) - 1]
+            stk.pop()
+            topArea = arr[top] * (i if len(stk) == 0 else i - stk[len(stk)-1]-1)
+            
+        if maxArea < topArea:
+            maxArea = topArea
+            
+        return maxArea
+
+#FGiven an array find all points that are greater than the points to its left
+#stack keeps track of indices, when current value is larger than 
+def MaxPoints(arr):
+    size = len(arr)
+    stk = []
+    SR = [0] *size
+    i = 1
+    stk.append(0)
+    
+    while i < size:
+        while len(stk) != 0 and arr[stk[len(stk) - 1]] < arr[i]:
+            stk.pop()
+        SR[i] = i - len(stk)
+        stk.append(i)
+        i += 1
+    ans = [arr[j] for i,j in enumerate(SR) if i == j]
+    
+    return ans
+
+#Example 7.32: Given an array, write a function to print the next larger element 
+#of the array
+def NextLargest(arr):
+    size = len(arr)
+    stk = []
+    SR = [-1]*size
+    stk.append(arr[size-1])
+    SR[size-1] = -1
+    i = size - 2
+   
+    while i >= 0:
+        while len(stk) > 0:
+            top = stk[-1]
+            if top <= arr[i]:
+                stk.pop()
+            else:
+                SR[i] = top
+                break
+            
+        if len(stk) == 0:
+            SR[i] = -1
+        stk.append(arr[i])
+        i -= 1
+        
+    return SR
+
+
+#Example 7.34 Given a circular array, find the next larger element of the 
+#circular array
+def NextLargestCircular(arr):
+    size = len(arr)
+    stk = []
+    output = [-1]*size
+    for i in range(2*size - 1):
+        curr = arr[i % size]
+        while len(stk) > 0 and arr[stk[-1]] <= curr:
+            index = stk.pop()
+            output[index] = curr
+        stk.append(i % size)
+        while len(stk) > 0:
+            index = stk.pop()
+            output[index] = -1
+            
+    return output
+
+#Example 7.35: Suppose we have fruits arranged in a 2D array. Among them, a few fruit 
+#are rotten. Each day, a rotten fruit rots fruit adjacent to it. Find the maximum number
+#of days in which the fruits of the whole grid will rot
+def RottenFruitUtil(arr, maxCol, maxRow, currCol, currRow, traversed, day):
+    if currCol < 0 or currCol >= maxCol or currRow < 0 or currRow >= maxRow:
+        return
+    if traversed[currCol][currRow] <= day or arr[currCol][currRow] == 0:
+        return
+    traversed[currCol][currRow] = day
+    RottenFruitUtil(arr, maxCol, maxRow, currCol-1, currRow, traversed, day)
+    RottenFruitUtil(arr, maxCol, maxRow, currCol+1, currRow, traversed, day)
+    RottenFruitUtil(arr, maxCol, maxRow, currCol, currRow-1, traversed, day)
+    RottenFruitUtil(arr, maxCol, maxRow, currCol, currRow+1, traversed, day)
+    
+infi = 99999
+def RottenFruit(arr, maxCol, maxRow):
+    traversed = [[infi]*maxCol for i in range(maxRow)]
+    for i in range(0, maxCol-1, 1):
+        for j in range(0, maxRow-1, 1):
+            if arr[i][j] == 2:
+                RottenFruitUtil(arr, maxCol, maxRow, i, j, traversed, 0)
+    maxday = 0
+    for i in range(0, maxCol, 1):
+        for j in range(0, maxRow, 1):
+            if arr[i][j] == 1:
+                if traversed[i][j] == infi:
+                    return -1
+                if maxday < traversed[i][j]:
+                    maxday = traversed[i][j]
+    return maxday
+    
+#Example 7.39: At a party there is a possibility that a celebrity has visited it. 
+#Acelebrity knows no one at the party but everyone knows them. You can only ask
+#DoYouKnow(X,Y) which means taht you can only ask one question that you know Y. it's
+#answered as yes or no
+def isKnown(relation, a, b):
+    if relation[a][b] == 1:
+        return True
+    return False
+
+def findCelebrity(relation, count):
+    stk = []
+    first, second = 0,0
+    
+    for i in range(1, count, 1):
+        if isKnown(relation, first, i):
+            stk.append(i)
+    
+    while len(stk) > 0:
+        second = stk.pop()
+        if isKnown(relation, first, second):
+            first = second
+    
+    for i in range(count):
+        if first != i and isKnown(relation, first, i):
+            return -1
+        if first != i and isKnown(relation, i, first) == False:
+            return -1
+    
+    return first
+            
+     
+        
+    first = stk.pop()
+    while len(stk) > 0:
+        second = stk.pop()
+        if isKnown(relation, first, second):
+            first = second
+            
+    for i 
+    
+        
+arr = [6, 3, 9, 8, 10, 2, 1, 15, 7]      
+print(NextLargestCircular(arr))
+            
+     
+    
+        
+            
+    
+# #arr = [1,2,3,4,5]
+# arr = [20,19,10,21,40,35,39,50,45,42]
+# print(MaxPoints(arr))
+    
+    
+            
+
+                    
+# s = Stack()
+# s.push(1)
+# s.push(2)
+# s.push(3)
+# s.push(4)
+# ReverseStack(s)
+# ReversekElements(s,2)
+# s.printStack()
