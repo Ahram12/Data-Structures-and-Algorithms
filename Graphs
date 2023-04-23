@@ -1,0 +1,528 @@
+
+"""
+Adjacency matrix method of storing graphs. Has the advantage of being to delete or 
+locate in constant time. However, it is problematic because it has high storage cost
+even for sparse graphs. Constant O(n^2) space complexity
+"""
+# class Graph(object):
+#     def __init__(self, cnt):
+#         self.count = cnt
+#         self.adj = [[0 for _ in range(cnt)] for _ in range(cnt)]
+        
+#     def AddDirectedEdge(self, source, destination, cost = 1):
+#         self.adj[source][destination] = cost
+        
+#     def AddUndirectedEdge(self, source, destination, cost = 1):
+#         self.AddDirectedEdge(source, destination, cost)
+#         self.AddDirectedEdge(destination, source, cost)
+        
+#     def Print(self):
+#         for i in range(self.count):
+#             print("Vertex ", i, " is connected to : ", end= ' ')
+#             for j in range(self.count):
+#                 if self.adj[i][j] != 0:
+#                     print(j , "")
+#             print("")
+            
+"""
+A more efficient method is an adjacency list. An adjacency list is an array of linked
+list. Each list element corresponds to an edge of a graph. Let the list be Arr, then 
+Arr[k] corresponds to the k-th vertex and is a list of vertices directly connected to
+the k-th vertex. Weights of edges can also be stored in nodes of linked lists. Space
+complexity is O(E+V) 
+"""
+from collections import deque
+
+class Graph(object):
+    def __init__(self, cnt):
+        self.count = cnt
+        self.adj = [[] for _ in range(cnt)]
+        
+    def AddDirectedEdge(self, source, destination, cost = 1):
+        edge = (destination, cost)
+        self.adj[source].append(edge)
+    
+    def AddUndirectedEdge(self, source, destination, cost = 1):
+        self.AddDirectedEdge(source, destination, cost)
+        self.AddDirectedEdge(destination, source, cost)
+        
+    def Print(self):
+        for i in range(self.count):
+            print("Vertex ", i, " is connected to : ", end= ' ')
+            for j in range(self.count):
+                if self.adj[i][j] != 0:
+                    print(j , "")
+            print("")
+    
+def DFSStack(gph, source, target):
+    count = gph.count
+    visited = [False] * count
+    stk = []
+    stk.append(source)
+    visited[source] = True
+    while len(stk) != 0:
+        curr = stk.pop()
+        print(curr, end = ' ')
+        for edge in gph.adj[curr]:
+            destination = edge[0]
+            if visited[destination] == False:
+                stk.append(destination)
+                visited[destination] = True
+    return visited[target]
+    
+
+def BFS(gph, source, target):
+    count = gph.count
+    visited = [False] * count
+    que = deque([])
+    que.append(source) 
+    visited[source] = True
+    while len(que) != 0:
+       curr = que.popleft()
+       print(curr, end = ' ')
+       for edge in gph.adj[curr]:
+           destination = edge[0]
+           if visited[destination] == False:
+                que.append(destination)
+                visited[destination] = True
+    return visited[target]
+   
+"""
+Directed Acyclic Graph (DAG) is a directed graph with no cycles
+
+Topological Sort: A method of ordering nodes of a directed graph in which nodes 
+represent activites and the edges represent dependency among those tasks. For this sort
+to work it is required that the graph has no cycles
+"""
+#Example 12.6: Topological Sort
+def TopologicalSortUtil(gph, source, visited, stk):
+    aux = []
+    stk.append(source)
+    visited[source] = True
+    while len(stk) != 0:
+        curr = stk.pop()
+        aux.append(curr)
+        for edge in gph.adj[curr]:
+            destination = edge[0]
+            if visited[destination] == False:
+                stk.append(destination)
+                visited[destination] = True
+    return aux
+            
+def TopologicalSort(gph):
+    stk = []
+    count = gph.count
+    visited = [False] * count
+    
+    for i in range(count):
+        if visited[i] == False:
+            TopologicalSortUtil(gph, i, visited, stk)
+    while len(stk) != 0:
+        print(stk.pop(), end = ' ')
+
+#Example 12.8: Given a source vertex and a destination vertex, find all possible
+#paths from source to destination
+def CountAllPathsDFS(gph, visited, source, dest):
+    if source == dest:
+        return 1
+    
+    count = 0
+    visited[source] = 1
+    for edge in gph.adj[source]:
+        if visited[edge[0]] == 0:
+            count += CountAllPathsDFS(gph, visited, edge[0], dest)
+    visited[source] = 0
+    return count 
+
+#Example 12.9 Print all paths
+def PrintAllPathsDFS(gph, visited, source, dest, path):
+    path.append(source)
+    if source == dest:
+        print(path)
+        return
+    
+    visited[source] = 1
+    for edge in gph.adj[source]:
+        if visited[edge[0]] == 0:
+            PrintAllPathsDFS(gph, visited, edge[0], dest, path)
+    visited[source] = 0
+    path.pop()
+    
+#Example 12.11: Given a directed graph, construct a transative closure or reachability
+#matrix.
+def TransativeClosureUtil(gph, source, index, tc):
+    if tc[source][index] == 1:
+        return 
+    tc[source][index] = 1
+    for edge in gph.adj[index]:
+        TransativeClosureUtil(gph, source, edge[0], tc)
+        
+def TransativeClosure(gph):
+    count = gph.count 
+    tc = [[0 for _ in range(count)] for _ in range(count)]
+    for source in range(count):
+        TransativeClosureUtil(gph, source, source, tc)
+    for row in tc:
+        print(row)
+    
+#Example 12.12 Perform BFS traversal of graph. Along with nodes, print their distance
+#from the starting source vertex
+def BFSLevelNode(gph, source):
+    count = gph.count
+    visited = [False] * count
+    visited[source] = True
+    que = deque([])
+    que.append((source, 0))
+    print("Node _ Level")
+    
+    while len(que) != 0:
+        node = que.popleft()
+        curr = node[0]
+        depth = node[1]
+        print(curr, " - ", depth)
+        for edge in gph.adj[curr]:
+            destination = edge[0]
+            if visited[destination] == False:
+                que.append((destination, depth+1))
+                visited[destination] = True
+                
+#Example 12.14: Find if there is a cycle in  undirected graph
+def CyclePresentDFS(gph, index, parentIndex, visited):
+    visited[index] = True
+    
+    for node in gph.adj[index]:
+        dest = node[0]
+        if visited[dest] == False:
+            if CyclePresentDFS(gph, dest, index, visited) == True:
+                return True
+            elif parentIndex != dest:
+                return True
+    return False
+
+#Example 12.16: Find if there is a cycle in directed graph using color method
+def CyclePresentColorDFS(gph, index, visited):
+    visited[index] = "Grey"
+    
+    for node in gph.adj[index]:
+        dest = node[0]
+        if visited[dest] == "Grey":
+            return True
+        
+        if visited[dest] == "White":
+            if CyclePresentColorDFS(gph, dest, visited): 
+                return True
+            
+    visited[index] = "Black"
+    return False
+
+#Example 12.17: Transpose a directed graph. Transpose of graph is a graph that has
+#same set of vertices but direction of edges is reversed 
+def TransposeGraph(gph):
+    count = gph.count
+    g = Graph(count)
+    for i in range(count):
+        for edge in gph.adj[i]:
+            destination = edge[0]
+            g.AddDirectedEdge(destination, i)
+    return g
+
+"""
+Spanning Tree: A tree that contains all vertices of a graph
+Minimum Spanning Tree (MST): A spanning tree whose sum of lengths/weight of edges
+is mimimum over all possible
+
+Prim's Algorithm for MST:
+Input: A weighted connected graph G = (V, E)
+Output: Set of edges comprising a MST
+T ={}
+Let r be any vertex in G
+U = {r}
+for i = 1 to |V| - 1 do
+    e = minimum-weight edge (u,v)
+    with u in U and v in V-U
+    U = U + {v}
+    T = T + {e}
+return T 
+Implementation of greedy algorithm
+"""
+
+class Heap(object):
+#The elements of the array consists of pairs (a verex and a distance). 
+#The heap however only keeps track of the distances
+#We use an additiional array, pos, to keep track of the corresponding vertex's place in 
+#the heap
+    def __init__(self):
+        self,array = []
+        self.size = 0
+        self.pos = []
+        
+    def newMinHeapNode(self, v, dist):
+        self.minHeapNode = [v, dist]
+        return self.minHeapNode
+    
+    def swapMinHeapNode(self, a, b):
+        temp = self.array[a]
+        self.array[a] = self.array[b]
+        self.array[b] = temp 
+    
+    def minHeapify(self, index):
+        smallest = index
+        left = 2*smallest + 1
+        right = 2*smallest + 2
+        if left < self.size and self.array[left][1] < self.array[smallest][1]:
+            smallest = left
+        if right < self.size and self.array[right][1] < self.array[smallest][1]: 
+            smallest = right 
+        
+        if smallest != index:
+            self.pos[self.array[smallest][0]] = index
+            self.pos[self.array[index][0]] = smallest
+            
+            self.swapMinHeapNode(smallest, index)
+            self.minHeapify(smallest)
+            
+    def ExtractMin(self):
+        if self.IsEmpty == True:
+            return 
+        
+        #Store root node
+        root = self.array[0]
+        
+        #Replace root node with last node
+        lastNode = self.array[self.size - 1]
+        self.array[0] = lastNode
+        
+        #Update position of last node
+        self.pos[lastNode[0]] = 0
+        self.pos[root[0]] = self.size - 1
+        
+        #Reduce size and heapify root
+        self.size -= 1
+        self.minHeapify(0)
+        
+        return root
+    
+    def isEmpty(self):
+        return (len(self.array) == 0)
+    
+    def UpdateKey(self, v, dist):
+        #Get index of v in Heap array
+        i = self.pos[v]
+        
+        # Get the node and update its dist value
+        self.array[i][1] = dist
+        
+        # Travel up while the complete tree is not heapified.
+        while i > 0 and self.array[i][1] <self.array[(i-1)//2][1]:
+            self.pos[self.array[i][0]] = (i-1)//2
+            self.pos[self.array[(i-1)//2][0]] = i
+            self.swapMinHeapNode(i, (i-1)//2)
+            
+            i = (i-1)//2
+            
+        
+def PrimMST(gph):
+    #Get count of vertices
+    count = gph.count
+    #Key values used to pick minimum weights in cut
+    key = [float('inf')]*count
+    #List to store constructed MST
+    parent = [-1]*count
+    #Keeps track of visited nodes
+    visited = [False]*count
+    #minHeap represents set of edges not currently in MST
+    minHeap = Heap()
+    #Initialize min heap with all vertices. Key values of all vertices 
+    #except initial vertex is initially infinite
+    for v in range(count):
+        minHeap.array.append(minHeap.newMinHeapNode(v, key[v]))
+    #Makke key value of 0-th value as 0 so it is extracted first
+    minHeap.pos[0] = 0
+    key[0] = 0
+    minHeap.UpdateKey(0,key[0])
+    
+    #Performs BFS search using Priority Queue/MinHeap
+    while minHeap.isEmpty() == False:
+        val = minHeap.ExtractMin()
+        source = val[0]
+        visited[source] = True
+        for edge in gph.adj[source]:
+            destination = edge[0]
+            cost = edge[1]
+            if cost < key[v] and visited[destination] == False:
+                key[destination] = cost
+                parent[destination] = source
+                minHeap.UpdateKey(cost, destination)
+                
+    for i in range(count):
+        if key[i] == float('inf'):
+            print("node id", i, "prev", parent[i], "distance unreachable")
+        else:
+            print("node id", i, "prev", parent[i], "distance", key[i])
+
+#Kruskal's Algortithm for MST
+
+#Given an unweighted graph find Source Shortest Path (SSP)
+def ShortestPath(gph, source):
+    count = gph.count
+    distance = [-1] * count
+    path = [-1] * count
+    que = deque([])
+    que.append(source)
+    distance[source] = 0
+    
+    while len(que) != 0:
+        curr = que.popleft()
+        for edge in gph.adj[curr]:
+            destination = edge[0]
+            if destination[destination] == -1:
+                distance[destination] = distance[curr] + 1
+                path[destination] = curr
+                que.append(destination)
+                
+    for i in range(count):
+        print((path[i]), "to", i, "weight", distance[i])
+        
+#Dijkstra's Algorithm: Used for SSP for weighted edges with non-negative weights
+#Given a weighted connected graph G, finds shortest paths from source vertex to 
+#each of other vertices. 
+#Primes Algortithm: Maintains a set of which shortest paths are known 
+def Dijkstra(gph, source):
+    count = gph.count
+    parent = [-1]*count
+    distance = [float('inf')] * count
+    visited = [False] * count
+    
+    distance[source] = True
+    minHeap = Heap()
+    for i in range(count):
+        minHeap.array.append(minHeap.newMinHeapNode(i, float('inf')))
+    minHeap.UpdateKey(source, 0)
+    
+    while minHeap.isEmpty() == False:
+        val = minHeap.ExtractMin()
+        source = val[0]
+        visited[source] = True
+        for edge in gph.adj[source]:
+            destination = edge[0]
+            cost = edge[1]
+            alt = cost + distance[source]
+            if alt < distance[destination] and visited[destination] == False:
+                distance[destination] = alt
+                parent[destination] = source
+                minHeap.UpdateKey(destination, alt)
+        
+    for i in range(count):
+        if distance[i] == float('inf'):
+            print("node id", i, "prev", parent[i], "distance unreachable")
+        else:
+            print("node id", i, "prev", parent[i], "distance", distance[i])
+       
+                
+#Bellman Ford
+#Idea is to iteratively consider paths of different lengths
+#First, paths of length 1, then paths of length 2, and then so on
+def BellmanFordShortestPath(gph, source):
+    count = gph.source
+    distance = [float("inf")] * count
+    path = [-1] * count
+    distance[source] = 0
+    
+    #Outer loop runs (V-1) number of times
+    #Inner for loop and while loop runs combined will run for E number of times
+    #Overall Complexity is then O(E*V)
+    for _ in range(count-1):
+        for j in range(count):
+            for edge in gph.adj[j]:
+                newDistance = distance[j] + edge[1]
+                if distance[edge[0]] > newDistance:
+                    distance[edge[0]] = newDistance
+                    path[edge[0]] = j                   
+#Can be used to compute the shortest path between all pairs of vertices, just 
+#execute BellmanFord V times. It has complexity O(V^3). 
+
+#Hamiltonian Path: A path in which every vertex is visited exactly once with no repeats
+#deoes NOT have to start and end at same vertex
+#This is an NP-Complete problem, so the only solution is using backtracking:
+#start from a vertex s and tries all adjacent verices recursively. If we do not find
+#the path then we backtrack and try other vertices
+def HamiltonianPathUtil(gph, path, added):
+    #Base Case: full length path is found
+    if len(path) == gph.count:
+        return True
+    
+    for vertex in range(gph.count):
+        #there is a path from last element to next vertex
+        #and the next vertex is not already included in the path
+        if gph.adj[path[-1]][vertex] == 1 and added[vertex] == False:
+            path.append(vertex)
+            added[vertex] = True
+            if HamiltonianPathUtil(gph, path, added):
+                return True
+            #backtracking
+            path.pop()
+            added[vertex] = False
+    return False
+
+#Gamiltonian circuit is a Hamiltonian path such that there is a path from the last
+#vertex to the first one. Similarly, NP-Complete
+def HamiltonianCycleUtil(gph, path, added):
+    #Base case: full length path is found
+    #last check to modify it to path
+    if len(path) == gph.count:
+        if gph.adj[path[-1]][path[0]] == 1:
+            path.append(path[0])
+            return True
+        else:
+            return False
+        
+    for vertex in range(gph.count):
+        #there is a path from last element to next vertex
+        #and the next vertex is not already included in the path
+        if gph.adj[path[-1]][vertex] == 1 and added[vertex] == False:
+            path.append(vertex)
+            added[vertex] = True
+            if HamiltonianPathUtil(gph, path, added):
+                return True
+            #backtracking
+            path.pop()
+            added[vertex] = False
+    return False
+
+"""
+A Euler path is a path that visits every edge exactly pnce
+A Euler circuit is a Euler path that ends at the same vertex
+A graph is Eulerian if it contains a Euler path
+A graph is semi-Eulerian if it contains an Euler path
+A graph is Eulerian if all the edges have an even number of edges in it
+A graph is Eulerian if all the vertices have an even number of edges
+A graph is semi-Eulerian if it has exactly two vertices with an odd number of edges
+"""
+        
+def isConnected(gph):
+    count = gph.count
+    visited = [False]*count
+    DFSStack(gph, 0, visited)
+    for i in range(count):
+        if visited[i] == False:
+            return False
+    return True
+            
+def isEulerian(gph):
+    count = gph.count
+    #Check if all non-zero degree vertices are connected
+    if isConnected(gph) == False:
+        return 0
+    else:
+        #Conut vertices with odd degree
+        odd = 0
+        for i in range(count):
+            if len(gph.adj[i]) %2 == 1:
+                odd += 1
+        if odd > 2:
+            return 0
+        elif odd == 2:
+            return 1
+        else:
+            return 2
+    
