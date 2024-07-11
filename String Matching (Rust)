@@ -1,0 +1,57 @@
+// Creates z-fuction for longest matching prefix starting at given character
+
+fn z(str: &Vec<char>) -> Vec<usize> {
+    let size = str.len();
+    let mut z: Vec<usize> = vec![0; size];
+    let mut left: usize = 0;
+    let mut right: usize = 0;
+
+    for i in 1..size {
+        if i > right {
+            left = i;
+            right = i;
+            while right < size && str[right - left] == str[right] {
+                right += 1
+            }
+            z[i] = right - left;
+            right -= 1;
+        } else {
+            let k: usize = i - left;
+            if z[k] < right - i + 1 {
+                z[i] = z[k];
+            } else {
+                left = i;
+                while right < size && str[right - left] == str[right] {
+                    right += 1;
+                }
+                z[i] = right - left;
+                right -= 1;
+            }
+        }
+    }
+
+    return z
+}
+
+//KMP Function, i.e, longest prefix that ends at a given index
+fn longest_prefix(s: String) -> Vec<usize> {
+    let vec: Vec<char> = s.chars().collect();
+    let size = vec.len();
+    let mut pi: Vec<usize> = vec![0; size];
+
+    for i in 1..size {
+        let mut j: usize = pi[i - 1];
+        while j > 0 && vec[j] != vec[i] {
+            j = pi[j - 1];
+        }
+        if vec[i] == vec[j] {
+            pi[i] = j + 1;
+        } else {
+            pi[i] = j;
+        }   
+    }
+
+    return pi
+}
+
+//TODO: add simplified and general Manachar's algorithm and Suffix Automotan (DAWG)
