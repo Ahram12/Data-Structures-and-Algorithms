@@ -1,3 +1,3 @@
 # DSA
 
-Various data structures and algorithms written in python 3
+Various data structures and algorithms written in python and Rust
